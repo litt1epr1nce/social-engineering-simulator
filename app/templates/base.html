@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Тренажёр социальной инженерии{% endblock %}</title>
+    <link rel="stylesheet" href="{{ request.url_for('static', path='/styles.css') }}">
+</head>
+<body>
+    <header class="site-header">
+        <nav>
+            <a href="{{ request.url_for('home') }}">Главная</a>
+            <a href="{{ request.url_for('train_get') }}">Тренировка</a>
+            <a href="{{ request.url_for('result_get') }}">Результаты</a>
+        </nav>
+        <h1>Тренажёр социальной инженерии</h1>
+    </header>
+    <main class="content">
+        {% block content %}{% endblock %}
+    </main>
+    <footer class="site-footer">
+        <p>Тренировка против социальной инженерии</p>
+    </footer>
+</body>
+</html>

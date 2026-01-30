@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Главная — Тренажёр социальной инженерии{% endblock %}
+{% block content %}
+<div class="home-card">
+    <h2>Добро пожаловать</h2>
+    <p>Тренируйтесь распознавать приёмы социальной инженерии в письмах, сообщениях и звонках. Выбирайте ответ и узнавайте, какие тактики использовались.</p>
+    <p><strong>Гостевой режим:</strong> прогресс сохраняется в этом браузере. Регистрация не нужна.</p>
+    <a href="{{ request.url_for('train_get') }}" class="btn btn-primary">Начать тренировку</a>
+    <a href="{{ request.url_for('result_get') }}" class="btn btn-secondary">Мои результаты</a>
+</div>
+{% endblock %}

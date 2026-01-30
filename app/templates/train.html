@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Тренировка — Тренажёр социальной инженерии{% endblock %}
+{% block content %}
+<div class="train-card">
+    {% if current_streak is defined and current_streak > 0 %}
+    <p class="streak-badge">Серия безопасных решений: <strong>{{ current_streak }}</strong></p>
+    {% endif %}
+    <p class="channel-badge channel-{{ scenario.channel }}">{{ scenario.channel }}</p>
+    <h2>{{ scenario.title }}</h2>
+    <div class="message-text">{{ scenario.message_text }}</div>
+    <form method="post" action="{{ request.url_for('train_post') }}" class="choices-form">
+        <input type="hidden" name="scenario_id" value="{{ scenario.id }}">
+        {% for choice in choices %}
+        <label class="choice-label">
+            <input type="radio" name="choice_index" value="{{ loop.index0 }}" required>
+            <span class="choice-text">{{ choice.text }}</span>
+        </label>
+        {% endfor %}
+        <button type="submit" class="btn btn-primary">Ответить</button>
+    </form>
+    <p><a href="{{ request.url_for('result_get') }}">Результаты</a></p>
+</div>
+{% endblock %}

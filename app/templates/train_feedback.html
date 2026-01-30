@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Результат — Тренажёр социальной инженерии{% endblock %}
+{% block content %}
+<div class="train-card feedback-card">
+    <h2>{{ scenario.title }}</h2>
+    <p class="outcome outcome-{{ 'safe' if is_safe else 'unsafe' }}">
+        {% if is_safe %}Безопасный выбор{% else %}Небезопасный выбор{% endif %}
+    </p>
+    <p class="tactic-badge">Тактика: {{ tactic_display_ru }}</p>
+    <p class="explanation">{{ explanation }}</p>
+    <a href="{{ request.url_for('train_get') }}" class="btn btn-primary">Следующий сценарий</a>
+    <a href="{{ request.url_for('result_get') }}" class="btn btn-secondary">Результаты</a>
+</div>
+{% endblock %}

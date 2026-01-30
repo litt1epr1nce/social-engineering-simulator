@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Результаты — Тренажёр социальной инженерии{% endblock %}
+{% block content %}
+<div class="result-card">
+    <h2>Ваши результаты</h2>
+    <div class="score-row">
+        <div class="score-box">
+            <span class="score-value">{{ risk_score }}</span>
+            <span class="score-label">Риск-скор (0–100)</span>
+        </div>
+        <div class="level-box level-{{ level | replace(' ', '-') | lower }}">
+            <span class="level-value">{{ level_display_ru }}</span>
+        </div>
+    </div>
+    <p class="stats-line">
+        Сценариев пройдено: <strong>{{ total_attempted }}</strong> — Безопасных решений: <strong>{{ correct_count }}</strong>
+        {% if total_attempted > 0 %}
+        — Доля безопасных: <strong>{{ safe_percentage }}%</strong>
+        {% endif %}
+    </p>
+    {% if current_streak is defined and current_streak >= 0 %}
+    <p class="streak-line">Текущая серия безопасных решений: <strong>{{ current_streak }}</strong></p>
+    {% endif %}
+    <h3>Ошибки по тактикам</h3>
+    <ul class="tactic-list">
+        {% for t in tactic_breakdown %}
+        <li><strong>{{ tactic_display_ru.get(t.tactic, t.tactic) }}</strong>: {{ t.mistake_count }} {% if t.mistake_count == 1 %}ошибка{% elif t.mistake_count >= 2 and t.mistake_count <= 4 %}ошибки{% else %}ошибок{% endif %}</li>
+        {% endfor %}
+    </ul>
+    <h3>Персональные советы</h3>
+    <ul class="tips-list">
+        {% for tip in tips %}
+        <li><strong>{{ tactic_display_ru.get(tip.tactic, tip.tactic) }}:</strong> {{ tip.tip }}</li>
+        {% endfor %}
+    </ul>
+    <h3>Достижения</h3>
+    <ul class="achievements-list">
+        {% for a in achievements %}
+        <li class="achievement-item achievement-{{ 'unlocked' if a.unlocked else 'locked' }}">
+            {{ a.name_ru }}{% if a.unlocked %} ✓{% endif %}
+        </li>
+        {% endfor %}
+    </ul>
+    <form method="post" action="{{ request.url_for('reset_post') }}" class="reset-form">
+        <button type="submit" class="btn btn-secondary">Сбросить прогресс</button>
+    </form>
+    <p><a href="{{ request.url_for('train_get') }}" class="btn btn-primary">Продолжить тренировку</a></p>
+</div>
+{% endblock %}

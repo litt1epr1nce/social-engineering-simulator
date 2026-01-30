@@ -1,0 +1,262 @@
+/* Social Engineering Simulator — minimal, clean styles */
+:root {
+    --bg: #0f1419;
+    --surface: #1a2332;
+    --text: #e6edf3;
+    --muted: #8b949e;
+    --primary: #58a6ff;
+    --safe: #3fb950;
+    --unsafe: #f85149;
+    --border: #30363d;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.site-header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 1rem 1.5rem;
+}
+
+.site-header nav {
+    margin-bottom: 0.5rem;
+}
+
+.site-header nav a {
+    color: var(--primary);
+    text-decoration: none;
+    margin-right: 1rem;
+}
+
+.site-header nav a:hover {
+    text-decoration: underline;
+}
+
+.site-header h1 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.content {
+    flex: 1;
+    padding: 1.5rem;
+    max-width: 640px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.home-card,
+.train-card,
+.result-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+}
+
+.home-card h2,
+.train-card h2,
+.result-card h2 {
+    margin-top: 0;
+    font-size: 1.25rem;
+}
+
+.streak-badge {
+    display: inline-block;
+    padding: 0.35rem 0.6rem;
+    background: rgba(63, 185, 80, 0.2);
+    color: var(--safe);
+    border-radius: 6px;
+    font-size: 0.9rem;
+    margin-bottom: 0.75rem;
+}
+
+.streak-line {
+    margin: 0.5rem 0 1rem;
+    color: var(--muted);
+    font-size: 0.95rem;
+}
+
+.channel-badge {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+}
+
+.channel-email { background: #1f6feb; color: #fff; }
+.channel-messenger { background: #8957e5; color: #fff; }
+.channel-call { background: #238636; color: #fff; }
+
+.message-text {
+    white-space: pre-wrap;
+    margin: 1rem 0;
+    padding: 1rem;
+    background: var(--bg);
+    border-radius: 6px;
+    border-left: 3px solid var(--primary);
+}
+
+.choices-form {
+    margin: 1rem 0;
+}
+
+.choice-label {
+    display: block;
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.choice-label:hover {
+    border-color: var(--primary);
+}
+
+.choice-label input {
+    margin-right: 0.5rem;
+}
+
+.btn {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 1rem;
+    border: none;
+    cursor: pointer;
+    margin-right: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: #fff;
+}
+
+.btn-primary:hover {
+    filter: brightness(1.1);
+}
+
+.btn-secondary {
+    background: var(--border);
+    color: var(--text);
+}
+
+.btn-secondary:hover {
+    background: var(--muted);
+}
+
+.outcome {
+    font-weight: 600;
+    padding: 0.5rem;
+    border-radius: 6px;
+}
+
+.outcome-safe { color: var(--safe); background: rgba(63, 185, 80, 0.15); }
+.outcome-unsafe { color: var(--unsafe); background: rgba(248, 81, 73, 0.15); }
+
+.tactic-badge {
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+.explanation {
+    margin: 1rem 0;
+    padding: 1rem;
+    background: var(--bg);
+    border-radius: 6px;
+}
+
+.score-row {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    margin: 1rem 0;
+}
+
+.score-box {
+    text-align: center;
+    padding: 1rem 1.5rem;
+    background: var(--bg);
+    border-radius: 8px;
+}
+
+.score-value {
+    display: block;
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+.score-label {
+    font-size: 0.85rem;
+    color: var(--muted);
+}
+
+.level-box {
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    font-weight: 600;
+}
+
+.level-security-ninja { background: rgba(63, 185, 80, 0.2); color: var(--safe); }
+.level-aware-user { background: rgba(63, 185, 80, 0.15); color: #7ee787; }
+.level-rookie { background: rgba(210, 153, 34, 0.2); color: #d29922; }
+.level-at-risk { background: rgba(248, 81, 73, 0.15); color: #ff7b72; }
+.level-high-risk { background: rgba(248, 81, 73, 0.25); color: var(--unsafe); }
+
+.stats-line { margin: 1rem 0; }
+
+.tactic-list,
+.tips-list,
+.achievements-list {
+    margin: 0.5rem 0;
+    padding-left: 1.25rem;
+}
+
+.tactic-list li,
+.tips-list li,
+.achievements-list li {
+    margin-bottom: 0.5rem;
+}
+
+.achievement-item.achievement-unlocked {
+    color: var(--safe);
+}
+
+.achievement-item.achievement-locked {
+    color: var(--muted);
+}
+
+.reset-form {
+    margin: 1rem 0;
+}
+
+.error-card .error-message {
+    color: var(--unsafe);
+}
+
+.site-footer {
+    text-align: center;
+    padding: 1rem;
+    color: var(--muted);
+    font-size: 0.85rem;
+    border-top: 1px solid var(--border);
+}

@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Ошибка — Тренажёр социальной инженерии{% endblock %}
+{% block content %}
+<div class="train-card error-card">
+    <h2>Что-то пошло не так</h2>
+    <p class="error-message">{{ message }}</p>
+    <a href="{{ request.url_for('home') }}" class="btn btn-primary">На главную</a>
+</div>
+{% endblock %}
