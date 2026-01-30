@@ -1,3 +1,0 @@
-git add nixpacks.toml
-git commit -m "Add Nixpacks start command"
-git push
