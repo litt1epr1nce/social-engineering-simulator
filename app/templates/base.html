@@ -4,21 +4,37 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Тренажёр социальной инженерии{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="{{ request.url_for('static', path='/styles.css') }}">
 </head>
-<body>
-    <header class="site-header">
-        <nav>
-            <a href="{{ request.url_for('home') }}">Главная</a>
-            <a href="{{ request.url_for('train_get') }}">Тренировка</a>
-            <a href="{{ request.url_for('result_get') }}">Результаты</a>
-        </nav>
-        <h1>Тренажёр социальной инженерии</h1>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col">
+    <header class="bg-slate-900 border-b border-slate-700">
+        <div class="max-w-4xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-2">
+            <nav class="flex items-center gap-4">
+                <a href="{{ request.url_for('home') }}" class="text-sky-400 hover:text-sky-300 focus:outline-none focus:ring-2 focus:ring-sky-500 rounded">Главная</a>
+                <a href="{{ request.url_for('train_get') }}" class="text-sky-400 hover:text-sky-300 focus:outline-none focus:ring-2 focus:ring-sky-500 rounded">Тренировка</a>
+                <a href="{{ request.url_for('result_get') }}" class="text-sky-400 hover:text-sky-300 focus:outline-none focus:ring-2 focus:ring-sky-500 rounded">Результаты</a>
+            </nav>
+            <div class="flex items-center gap-3">
+                {% if current_user is defined and current_user %}
+                <span class="text-slate-400 text-sm">{{ current_user.email }}</span>
+                <form method="post" action="{{ request.url_for('logout_post') }}" class="inline">
+                    <button type="submit" class="text-slate-400 hover:text-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-500 rounded px-2 py-1 text-sm">Выйти</button>
+                </form>
+                {% else %}
+                <a href="{{ request.url_for('login_get') }}" class="text-sky-400 hover:text-sky-300 focus:outline-none focus:ring-2 focus:ring-sky-500 rounded px-2 py-1 text-sm">Вход</a>
+                <a href="{{ request.url_for('register_get') }}" class="bg-sky-600 hover:bg-sky-500 text-white px-3 py-1.5 rounded text-sm focus:outline-none focus:ring-2 focus:ring-sky-400">Регистрация</a>
+                {% endif %}
+            </div>
+        </div>
+        <div class="max-w-4xl mx-auto px-4 pb-2">
+            <h1 class="text-lg font-semibold text-slate-200">Тренажёр социальной инженерии</h1>
+        </div>
     </header>
-    <main class="content">
+    <main class="flex-1 max-w-4xl w-full mx-auto px-4 py-6">
         {% block content %}{% endblock %}
     </main>
-    <footer class="site-footer">
+    <footer class="text-center py-4 text-slate-500 text-sm border-t border-slate-800">
         <p>Тренировка против социальной инженерии</p>
     </footer>
 </body>

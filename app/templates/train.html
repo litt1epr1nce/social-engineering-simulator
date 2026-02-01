@@ -1,23 +1,32 @@
 {% extends "base.html" %}
 {% block title %}Тренировка — Тренажёр социальной инженерии{% endblock %}
 {% block content %}
-<div class="train-card">
+<div class="bg-slate-900/60 border border-slate-700 rounded-xl p-6 max-w-2xl mx-auto">
     {% if current_streak is defined and current_streak > 0 %}
-    <p class="streak-badge">Серия безопасных решений: <strong>{{ current_streak }}</strong></p>
+    <p class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/20 text-emerald-400 text-sm mb-4">
+        <span>Серия безопасных решений:</span> <strong>{{ current_streak }}</strong>
+    </p>
     {% endif %}
-    <p class="channel-badge channel-{{ scenario.channel }}">{{ scenario.channel }}</p>
-    <h2>{{ scenario.title }}</h2>
-    <div class="message-text">{{ scenario.message_text }}</div>
-    <form method="post" action="{{ request.url_for('train_post') }}" class="choices-form">
+    <span class="inline-block px-2 py-0.5 rounded text-xs font-medium uppercase
+        {% if scenario.channel == 'email' %}bg-sky-500/20 text-sky-400
+        {% elif scenario.channel == 'messenger' %}bg-violet-500/20 text-violet-400
+        {% else %}bg-emerald-500/20 text-emerald-400{% endif %}">
+        {{ scenario.channel }}
+    </span>
+    <h2 class="text-xl font-semibold text-slate-100 mt-3 mb-3">{{ scenario.title }}</h2>
+    <div class="bg-slate-800/80 border-l-4 border-sky-500 rounded-r-lg p-4 text-slate-200 whitespace-pre-wrap mb-5">{{ scenario.message_text }}</div>
+    <form method="post" action="{{ request.url_for('train_post') }}" class="space-y-3">
         <input type="hidden" name="scenario_id" value="{{ scenario.id }}">
         {% for choice in choices %}
-        <label class="choice-label">
-            <input type="radio" name="choice_index" value="{{ loop.index0 }}" required>
-            <span class="choice-text">{{ choice.text }}</span>
+        <label class="flex items-start gap-3 p-3 rounded-lg border border-slate-600 hover:border-sky-500/50 cursor-pointer transition-colors">
+            <input type="radio" name="choice_index" value="{{ loop.index0 }}" required class="mt-1 rounded-full border-slate-500 text-sky-500 focus:ring-sky-500">
+            <span class="choice-text text-slate-200">{{ choice.text }}</span>
         </label>
         {% endfor %}
-        <button type="submit" class="btn btn-primary">Ответить</button>
+        <button type="submit" class="w-full sm:w-auto bg-sky-600 hover:bg-sky-500 text-white font-medium px-6 py-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-400">Ответить</button>
     </form>
-    <p><a href="{{ request.url_for('result_get') }}">Результаты</a></p>
+    <p class="mt-4">
+        <a href="{{ request.url_for('result_get') }}" class="text-sky-400 hover:text-sky-300 text-sm">Результаты</a>
+    </p>
 </div>
 {% endblock %}

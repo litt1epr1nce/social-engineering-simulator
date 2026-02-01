@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Регистрация — Тренажёр социальной инженерии{% endblock %}
+{% block content %}
+<div class="max-w-sm mx-auto">
+    <h2 class="text-xl font-semibold text-slate-200 mb-4">Регистрация</h2>
+    {% if link_progress is defined and link_progress %}
+    <p class="text-sky-400 text-sm mb-3">После регистрации ваш текущий прогресс будет привязан к аккаунту.</p>
+    {% endif %}
+    {% if error is defined and error == 'exists' %}
+    <p class="text-amber-400 text-sm mb-3">Такой email уже зарегистрирован.</p>
+    {% endif %}
+    {% if error is defined and error == 'short' %}
+    <p class="text-amber-400 text-sm mb-3">Пароль должен быть не короче 4 символов.</p>
+    {% endif %}
+    <form method="post" action="{{ request.url_for('register_post') }}" class="space-y-4">
+        <input type="hidden" name="link_progress" value="{{ link_progress if link_progress is defined else 0 }}">
+        <div>
+            <label for="email" class="block text-sm text-slate-400 mb-1">Email</label>
+            <input type="email" id="email" name="email" required
+                   class="w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                   placeholder="you@example.com">
+        </div>
+        <div>
+            <label for="password" class="block text-sm text-slate-400 mb-1">Пароль</label>
+            <input type="password" id="password" name="password" required minlength="4"
+                   class="w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500">
+        </div>
+        <button type="submit" class="w-full bg-sky-600 hover:bg-sky-500 text-white font-medium py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-400">Зарегистрироваться</button>
+    </form>
+    <p class="mt-4 text-slate-400 text-sm">
+        Уже есть аккаунт? <a href="{{ request.url_for('login_get') }}" class="text-sky-400 hover:text-sky-300">Вход</a>
+    </p>
+</div>
+{% endblock %}

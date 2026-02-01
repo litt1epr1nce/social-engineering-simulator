@@ -23,6 +23,10 @@ class Settings(BaseSettings):
     session_cookie_name: str = "ses_session_id"
     session_cookie_max_age: int = 60 * 60 * 24 * 30  # 30 days
 
+    # Auth cookie (session-based for logged-in users)
+    auth_cookie_name: str = "ses_auth"
+    auth_cookie_max_age: int = 60 * 60 * 24 * 14  # 14 days
+
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"

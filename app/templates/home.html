@@ -1,11 +1,57 @@
 {% extends "base.html" %}
 {% block title %}Главная — Тренажёр социальной инженерии{% endblock %}
 {% block content %}
-<div class="home-card">
-    <h2>Добро пожаловать</h2>
-    <p>Тренируйтесь распознавать приёмы социальной инженерии в письмах, сообщениях и звонках. Выбирайте ответ и узнавайте, какие тактики использовались.</p>
-    <p><strong>Гостевой режим:</strong> прогресс сохраняется в этом браузере. Регистрация не нужна.</p>
-    <a href="{{ request.url_for('train_get') }}" class="btn btn-primary">Начать тренировку</a>
-    <a href="{{ request.url_for('result_get') }}" class="btn btn-secondary">Мои результаты</a>
+<div class="space-y-10">
+    <section class="text-center py-8">
+        <h2 class="text-3xl md:text-4xl font-bold text-slate-100 mb-3">Учитесь распознавать уловки</h2>
+        <p class="text-slate-400 text-lg max-w-xl mx-auto mb-6">Тренируйтесь на реалистичных сценариях: письма, сообщения и звонки. Выбирайте ответ и узнавайте, какие тактики использовались.</p>
+        <a href="{{ request.url_for('train_get') }}" class="inline-block bg-sky-600 hover:bg-sky-500 text-white font-medium px-6 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-400 focus:ring-offset-2 focus:ring-offset-slate-950">Начать тренировку</a>
+    </section>
+
+    {% if mini_stats is defined and mini_stats %}
+    <section class="bg-slate-900/60 border border-slate-700 rounded-xl p-5 max-w-md mx-auto">
+        <h3 class="text-sm font-medium text-slate-400 mb-3">Ваша статистика</h3>
+        <div class="flex flex-wrap gap-4 justify-center">
+            <div class="text-center">
+                <span class="block text-2xl font-bold text-slate-100">{{ mini_stats.risk_score }}</span>
+                <span class="text-xs text-slate-500">Риск-скор</span>
+            </div>
+            <div class="text-center">
+                <span class="block text-lg font-semibold text-sky-400">{{ mini_stats.level_display_ru }}</span>
+                <span class="text-xs text-slate-500">Уровень</span>
+            </div>
+            <div class="text-center">
+                <span class="block text-2xl font-bold text-emerald-400">{{ mini_stats.current_streak }}</span>
+                <span class="text-xs text-slate-500">Серия</span>
+            </div>
+        </div>
+        <p class="mt-3 text-center">
+            <a href="{{ request.url_for('result_get') }}" class="text-sky-400 hover:text-sky-300 text-sm">Подробные результаты</a>
+            ·
+            <a href="{{ request.url_for('train_get') }}" class="text-sky-400 hover:text-sky-300 text-sm">Продолжить</a>
+        </p>
+    </section>
+    {% endif %}
+
+    <section class="grid md:grid-cols-3 gap-6">
+        <div class="bg-slate-900/60 border border-slate-700 rounded-xl p-5">
+            <h3 class="font-semibold text-slate-200 mb-2">Реалистичные сценарии</h3>
+            <p class="text-slate-400 text-sm">Письма, мессенджеры и звонки — как в жизни. Без крайностей, нейтральные формулировки.</p>
+        </div>
+        <div class="bg-slate-900/60 border border-slate-700 rounded-xl p-5">
+            <h3 class="font-semibold text-slate-200 mb-2">Мгновенная обратная связь</h3>
+            <p class="text-slate-400 text-sm">Сразу видно, безопасен ли выбор, какая тактика использовалась и как действовать дальше.</p>
+        </div>
+        <div class="bg-slate-900/60 border border-slate-700 rounded-xl p-5">
+            <h3 class="font-semibold text-slate-200 mb-2">Персональные советы</h3>
+            <p class="text-slate-400 text-sm">Рекомендации по слабым тактикам и достижения за серии и правильные ответы.</p>
+        </div>
+    </section>
+
+    <section class="text-center">
+        <a href="{{ request.url_for('train_get') }}" class="text-sky-400 hover:text-sky-300 font-medium">Начать тренировку</a>
+        <span class="text-slate-600 mx-2">·</span>
+        <a href="{{ request.url_for('result_get') }}" class="text-sky-400 hover:text-sky-300 font-medium">Мои результаты</a>
+    </section>
 </div>
 {% endblock %}

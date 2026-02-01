@@ -6,7 +6,7 @@ from fastapi.staticfiles import StaticFiles
 from app.core.config import get_settings
 from app.db.session import engine
 from app.db.base import Base
-from app.routers import web, api
+from app.routers import web, api, auth
 from app.services.seeding import seed_scenarios
 from app.db.session import SessionLocal
 
@@ -40,6 +40,7 @@ settings = get_settings()
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 app.include_router(web.router)
+app.include_router(auth.router)
 app.include_router(api.router)
 
 

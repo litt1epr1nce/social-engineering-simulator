@@ -1,14 +1,18 @@
 {% extends "base.html" %}
 {% block title %}Результат — Тренажёр социальной инженерии{% endblock %}
 {% block content %}
-<div class="train-card feedback-card">
-    <h2>{{ scenario.title }}</h2>
-    <p class="outcome outcome-{{ 'safe' if is_safe else 'unsafe' }}">
+<div class="bg-slate-900/60 border border-slate-700 rounded-xl p-6 max-w-2xl mx-auto">
+    <h2 class="text-xl font-semibold text-slate-100 mb-3">{{ scenario.title }}</h2>
+    <p class="inline-block px-3 py-1.5 rounded-lg font-medium mb-4
+        {% if is_safe %}bg-emerald-500/20 text-emerald-400
+        {% else %}bg-red-500/20 text-red-400{% endif %}">
         {% if is_safe %}Безопасный выбор{% else %}Небезопасный выбор{% endif %}
     </p>
-    <p class="tactic-badge">Тактика: {{ tactic_display_ru }}</p>
-    <p class="explanation">{{ explanation }}</p>
-    <a href="{{ request.url_for('train_get') }}" class="btn btn-primary">Следующий сценарий</a>
-    <a href="{{ request.url_for('result_get') }}" class="btn btn-secondary">Результаты</a>
+    <p class="text-slate-400 text-sm mb-2">Тактика: <span class="text-slate-300">{{ tactic_display_ru }}</span></p>
+    <p class="bg-slate-800/80 rounded-lg p-4 text-slate-200">{{ explanation }}</p>
+    <div class="mt-6 flex flex-wrap gap-3">
+        <a href="{{ request.url_for('train_get') }}" class="bg-sky-600 hover:bg-sky-500 text-white font-medium px-5 py-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-400">Следующий сценарий</a>
+        <a href="{{ request.url_for('result_get') }}" class="bg-slate-700 hover:bg-slate-600 text-slate-200 font-medium px-5 py-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500">Результаты</a>
+    </div>
 </div>
 {% endblock %}

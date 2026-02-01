@@ -10,7 +10,9 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
+from app.core.security import verify_session_token
 from app.db.session import get_db
+from app.models.user import User
 from app.models.progress import Progress
 from app.models.scenario import Scenario
 from app.models.attempt import Attempt
@@ -33,6 +35,20 @@ settings = get_settings()
 templates = Jinja2Templates(directory="app/templates")
 
 
+def get_current_user_optional(
+    request: Request,
+    db: Annotated[Session, Depends(get_db)],
+) -> User | None:
+    """Return current user if auth cookie is valid; else None."""
+    token = request.cookies.get(settings.auth_cookie_name)
+    if not token:
+        return None
+    user_id = verify_session_token(token)
+    if user_id is None:
+        return None
+    return db.query(User).filter(User.id == user_id).first()
+
+
 def get_or_create_session_id(request: Request) -> str:
     """Get session_id from cookie or create new and set cookie."""
     sid = request.cookies.get(settings.session_cookie_name)
@@ -44,8 +60,24 @@ def get_or_create_session_id(request: Request) -> str:
 def get_or_create_progress(
     request: Request,
     db: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User | None, Depends(get_current_user_optional)],
 ) -> Progress:
-    """Get or create Progress for guest session (cookie session_id)."""
+    """Get or create Progress: by user_id when logged in, else by session_id (guest)."""
+    if current_user:
+        progress = db.query(Progress).filter(Progress.user_id == current_user.id).first()
+        if progress is None:
+            progress = Progress(
+                user_id=current_user.id,
+                session_id=None,
+                risk_score=INITIAL_RISK_SCORE,
+                total_attempted=0,
+                correct_count=0,
+                current_streak=0,
+            )
+            db.add(progress)
+            db.commit()
+            db.refresh(progress)
+        return progress
     sid = get_or_create_session_id(request)
     progress = db.query(Progress).filter(Progress.session_id == sid).first()
     if progress is None:
@@ -63,8 +95,8 @@ def get_or_create_progress(
 
 
 def _ensure_session_cookie(request: Request, response: Response, progress: Progress) -> None:
-    """Set session cookie on response if missing (new guest)."""
-    if not request.cookies.get(settings.session_cookie_name) and progress.session_id:
+    """Set session cookie on response if missing (new guest). Only for guest progress."""
+    if progress.session_id and not request.cookies.get(settings.session_cookie_name):
         response.set_cookie(
             key=settings.session_cookie_name,
             value=progress.session_id,
@@ -78,11 +110,28 @@ def _ensure_session_cookie(request: Request, response: Response, progress: Progr
 def home(
     request: Request,
     db: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User | None, Depends(get_current_user_optional)],
     progress: Annotated[Progress, Depends(get_or_create_progress)],
 ):
-    """Home page. Seed scenarios on first run."""
+    """Landing page: hero, features, mini stats for returning user."""
     seed_scenarios(db)
-    resp = templates.TemplateResponse("home.html", {"request": request})
+    level_display_ru = get_level_display_ru(progress.risk_score) if progress else None
+    mini_stats = None
+    if progress and progress.total_attempted > 0:
+        mini_stats = {
+            "risk_score": progress.risk_score,
+            "level_display_ru": level_display_ru,
+            "current_streak": getattr(progress, "current_streak", 0),
+        }
+    resp = templates.TemplateResponse(
+        "home.html",
+        {
+            "request": request,
+            "current_user": current_user,
+            "is_guest": current_user is None,
+            "mini_stats": mini_stats,
+        },
+    )
     _ensure_session_cookie(request, resp, progress)
     return resp
 
@@ -91,6 +140,7 @@ def home(
 def train_get(
     request: Request,
     db: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User | None, Depends(get_current_user_optional)],
     progress: Annotated[Progress, Depends(get_or_create_progress)],
 ):
     """Show next scenario (random)."""
@@ -98,7 +148,12 @@ def train_get(
     if not scenario:
         return templates.TemplateResponse(
             "error.html",
-            {"request": request, "message": "Нет доступных сценариев. Запустите приложение снова."},
+            {
+                "request": request,
+                "message": "Нет доступных сценариев. Запустите приложение снова.",
+                "current_user": current_user,
+                "is_guest": current_user is None,
+            },
             status_code=404,
         )
     choices = [ChoiceSchema(**c) for c in json.loads(scenario.choices_json)]
@@ -106,6 +161,8 @@ def train_get(
         "train.html",
         {
             "request": request,
+            "current_user": current_user,
+            "is_guest": current_user is None,
             "scenario": scenario,
             "choices": choices,
             "current_streak": getattr(progress, "current_streak", 0),
@@ -167,6 +224,7 @@ def train_post(
 def train_feedback(
     request: Request,
     db: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User | None, Depends(get_current_user_optional)],
     scenario_id: int,
     choice_index: int,
 ):
@@ -182,6 +240,8 @@ def train_feedback(
         "train_feedback.html",
         {
             "request": request,
+            "current_user": current_user,
+            "is_guest": current_user is None,
             "scenario": scenario,
             "choice": choice,
             "is_safe": choice["is_safe"],
@@ -196,6 +256,7 @@ def train_feedback(
 def result_get(
     request: Request,
     db: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User | None, Depends(get_current_user_optional)],
     progress: Annotated[Progress, Depends(get_or_create_progress)],
 ):
     """Results page: risk score, level, safe %, streak, tactic breakdown, tips, achievements."""
@@ -219,6 +280,8 @@ def result_get(
         "result.html",
         {
             "request": request,
+            "current_user": current_user,
+            "is_guest": current_user is None,
             "risk_score": progress.risk_score,
             "level": level,
             "level_display_ru": level_display_ru,

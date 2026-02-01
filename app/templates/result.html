@@ -1,49 +1,67 @@
 {% extends "base.html" %}
 {% block title %}Результаты — Тренажёр социальной инженерии{% endblock %}
 {% block content %}
-<div class="result-card">
-    <h2>Ваши результаты</h2>
-    <div class="score-row">
-        <div class="score-box">
-            <span class="score-value">{{ risk_score }}</span>
-            <span class="score-label">Риск-скор (0–100)</span>
+<div class="bg-slate-900/60 border border-slate-700 rounded-xl p-6 max-w-2xl mx-auto space-y-6">
+    <h2 class="text-xl font-semibold text-slate-100">Ваши результаты</h2>
+
+    <div class="flex flex-wrap gap-4 items-center">
+        <div class="bg-slate-800/80 rounded-lg px-5 py-4 text-center min-w-[100px]">
+            <span class="block text-3xl font-bold text-slate-100">{{ risk_score }}</span>
+            <span class="text-xs text-slate-500">Риск-скор (0–100)</span>
         </div>
-        <div class="level-box level-{{ level | replace(' ', '-') | lower }}">
+        <div class="level-box level-{{ level | replace(' ', '-') | lower }} px-4 py-2 rounded-lg font-semibold">
             <span class="level-value">{{ level_display_ru }}</span>
         </div>
     </div>
-    <p class="stats-line">
-        Сценариев пройдено: <strong>{{ total_attempted }}</strong> — Безопасных решений: <strong>{{ correct_count }}</strong>
+
+    <p class="text-slate-400 text-sm">
+        Сценариев пройдено: <strong class="text-slate-200">{{ total_attempted }}</strong>
+        — Безопасных решений: <strong class="text-slate-200">{{ correct_count }}</strong>
         {% if total_attempted > 0 %}
-        — Доля безопасных: <strong>{{ safe_percentage }}%</strong>
+        — Доля безопасных: <strong class="text-slate-200">{{ safe_percentage }}%</strong>
         {% endif %}
     </p>
     {% if current_streak is defined and current_streak >= 0 %}
-    <p class="streak-line">Текущая серия безопасных решений: <strong>{{ current_streak }}</strong></p>
+    <p class="text-slate-400 text-sm">Текущая серия безопасных решений: <strong class="text-emerald-400">{{ current_streak }}</strong></p>
     {% endif %}
-    <h3>Ошибки по тактикам</h3>
-    <ul class="tactic-list">
+
+    <h3 class="font-semibold text-slate-200">Ошибки по тактикам</h3>
+    <ul class="space-y-1.5">
         {% for t in tactic_breakdown %}
-        <li><strong>{{ tactic_display_ru.get(t.tactic, t.tactic) }}</strong>: {{ t.mistake_count }} {% if t.mistake_count == 1 %}ошибка{% elif t.mistake_count >= 2 and t.mistake_count <= 4 %}ошибки{% else %}ошибок{% endif %}</li>
+        <li><strong class="text-slate-300">{{ tactic_display_ru.get(t.tactic, t.tactic) }}</strong>: {{ t.mistake_count }} {% if t.mistake_count == 1 %}ошибка{% elif t.mistake_count >= 2 and t.mistake_count <= 4 %}ошибки{% else %}ошибок{% endif %}</li>
         {% endfor %}
     </ul>
-    <h3>Персональные советы</h3>
-    <ul class="tips-list">
+
+    <h3 class="font-semibold text-slate-200">Персональные советы</h3>
+    <ul class="space-y-2">
         {% for tip in tips %}
-        <li><strong>{{ tactic_display_ru.get(tip.tactic, tip.tactic) }}:</strong> {{ tip.tip }}</li>
+        <li><strong class="text-sky-400">{{ tactic_display_ru.get(tip.tactic, tip.tactic) }}:</strong> <span class="text-slate-300">{{ tip.tip }}</span></li>
         {% endfor %}
     </ul>
-    <h3>Достижения</h3>
-    <ul class="achievements-list">
+
+    <h3 class="font-semibold text-slate-200">Достижения</h3>
+    <div class="flex flex-wrap gap-2">
         {% for a in achievements %}
-        <li class="achievement-item achievement-{{ 'unlocked' if a.unlocked else 'locked' }}">
+        <span class="inline-flex items-center px-3 py-1.5 rounded-full text-sm
+            {% if a.unlocked %}bg-emerald-500/20 text-emerald-400
+            {% else %}bg-slate-700 text-slate-500{% endif %}">
             {{ a.name_ru }}{% if a.unlocked %} ✓{% endif %}
-        </li>
+        </span>
         {% endfor %}
-    </ul>
-    <form method="post" action="{{ request.url_for('reset_post') }}" class="reset-form">
-        <button type="submit" class="btn btn-secondary">Сбросить прогресс</button>
+    </div>
+
+    {% if is_guest is defined and is_guest %}
+    <div class="pt-2 border-t border-slate-700">
+        <a href="{{ request.url_for('register_get') }}?link_progress=1" class="inline-block bg-amber-600/80 hover:bg-amber-500/80 text-slate-900 font-medium px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-400">Сохранить прогресс в аккаунт</a>
+        <p class="text-slate-500 text-xs mt-1">После регистрации текущий прогресс будет привязан к аккаунту.</p>
+    </div>
+    {% endif %}
+
+    <form method="post" action="{{ request.url_for('reset_post') }}" class="pt-2">
+        <button type="submit" class="bg-slate-700 hover:bg-slate-600 text-slate-200 font-medium px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500">Сбросить прогресс</button>
     </form>
-    <p><a href="{{ request.url_for('train_get') }}" class="btn btn-primary">Продолжить тренировку</a></p>
+    <p>
+        <a href="{{ request.url_for('train_get') }}" class="text-sky-400 hover:text-sky-300 font-medium">Продолжить тренировку</a>
+    </p>
 </div>
 {% endblock %}

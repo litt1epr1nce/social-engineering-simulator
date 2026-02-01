@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 {% block title %}Ошибка — Тренажёр социальной инженерии{% endblock %}
 {% block content %}
-<div class="train-card error-card">
-    <h2>Что-то пошло не так</h2>
-    <p class="error-message">{{ message }}</p>
-    <a href="{{ request.url_for('home') }}" class="btn btn-primary">На главную</a>
+<div class="bg-slate-900/60 border border-slate-700 rounded-xl p-6 max-w-lg mx-auto">
+    <h2 class="text-xl font-semibold text-slate-200 mb-3">Что-то пошло не так</h2>
+    <p class="text-red-400 mb-4">{{ message }}</p>
+    <a href="{{ request.url_for('home') }}" class="inline-block bg-sky-600 hover:bg-sky-500 text-white font-medium px-5 py-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-400">На главную</a>
 </div>
 {% endblock %}
