@@ -6,5 +6,11 @@ from app.models.attempt import Attempt  # noqa: F401
 from app.models.progress import Progress  # noqa: F401
 from app.models.scenario import Scenario  # noqa: F401
 from app.models.user import User  # noqa: F401
+# app/db/base.py
+from sqlalchemy.orm import DeclarativeBase
+
+class Base(DeclarativeBase):
+    pass
+
 
 __all__ = ["Base", "User", "Scenario", "Progress", "Attempt"]

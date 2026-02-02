@@ -7,7 +7,8 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Request, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
-from sqlalchemy.orm import Session
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
 from app.core.security import (
@@ -24,7 +25,6 @@ router = APIRouter()
 settings = get_settings()
 templates = Jinja2Templates(directory="app/templates")
 
-# Простая, практичная проверка email
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
 
@@ -37,9 +37,9 @@ def _normalize_email(email: str | None) -> str:
     return (email or "").strip().lower()
 
 
-def get_current_user_optional(
+async def get_current_user_optional(
     request: Request,
-    db: Annotated[Session, Depends(get_db)],
+    db: Annotated[AsyncSession, Depends(get_db)],
 ) -> User | None:
     """Return current user if auth cookie is valid; else None."""
     token = request.cookies.get(settings.auth_cookie_name)
@@ -50,11 +50,12 @@ def get_current_user_optional(
     if user_id is None:
         return None
 
-    return db.query(User).filter(User.id == user_id).first()
+    result = await db.execute(select(User).where(User.id == user_id))
+    return result.scalar_one_or_none()
 
 
 @router.get("/login", response_class=HTMLResponse)
-def login_get(
+async def login_get(
     request: Request,
     current_user: Annotated["User | None", Depends(get_current_user_optional)],
     error: str | None = None,
@@ -72,16 +73,18 @@ def login_get(
 
 
 @router.post("/login", response_class=RedirectResponse)
-def login_post(
+async def login_post(
     request: Request,
-    db: Annotated[Session, Depends(get_db)],
+    db: Annotated[AsyncSession, Depends(get_db)],
     email: Annotated[str, Form()],
     password: Annotated[str, Form()],
 ):
     """Authenticate and set auth cookie; redirect to home."""
     email_norm = _normalize_email(email)
 
-    user = db.query(User).filter(User.email == email_norm).first()
+    result = await db.execute(select(User).where(User.email == email_norm))
+    user = result.scalar_one_or_none()
+
     if not user or not verify_password(password, user.hashed_password):
         return _redirect(request.url_for("login_get"), error="invalid")
 
@@ -99,7 +102,7 @@ def login_post(
 
 
 @router.get("/register", response_class=HTMLResponse)
-def register_get(
+async def register_get(
     request: Request,
     current_user: Annotated["User | None", Depends(get_current_user_optional)],
     link_progress: int = 0,
@@ -119,9 +122,9 @@ def register_get(
 
 
 @router.post("/register", response_class=RedirectResponse)
-def register_post(
+async def register_post(
     request: Request,
-    db: Annotated[Session, Depends(get_db)],
+    db: Annotated[AsyncSession, Depends(get_db)],
     email: Annotated[str, Form()],
     password: Annotated[str, Form()],
     link_progress: Annotated[int, Form()] = 0,
@@ -130,37 +133,36 @@ def register_post(
     email_norm = _normalize_email(email)
     pwd = password or ""
 
-    # email format
     if not email_norm or not EMAIL_RE.match(email_norm):
         return _redirect(request.url_for("register_get"), link_progress=link_progress, error="email")
 
-    # minimum password length (characters)
     if len(pwd) < 8:
         return _redirect(request.url_for("register_get"), link_progress=link_progress, error="short")
 
-    # bcrypt hard limit: 72 bytes (UTF-8)
     if len(pwd.encode("utf-8")) > 72:
         return _redirect(request.url_for("register_get"), link_progress=link_progress, error="toolong")
 
     # user exists?
-    if db.query(User).filter(User.email == email_norm).first():
+    exists_result = await db.execute(select(User.id).where(User.email == email_norm))
+    if exists_result.scalar_one_or_none() is not None:
         return _redirect(request.url_for("register_get"), link_progress=link_progress, error="exists")
 
     # create user
     user = User(email=email_norm, hashed_password=hash_password(pwd))
     db.add(user)
-    db.commit()
-    db.refresh(user)
+    await db.commit()
+    await db.refresh(user)
 
     # link guest progress
     if link_progress:
         sid = request.cookies.get(settings.session_cookie_name)
         if sid:
-            progress = db.query(Progress).filter(Progress.session_id == sid).first()
+            prog_result = await db.execute(select(Progress).where(Progress.session_id == sid))
+            progress = prog_result.scalar_one_or_none()
             if progress:
                 progress.user_id = user.id
                 progress.session_id = None
-                db.commit()
+                await db.commit()
 
     # auto-login
     token = create_session_token(user.id)
@@ -177,9 +179,8 @@ def register_post(
 
 
 @router.post("/logout", response_class=RedirectResponse)
-def logout_post(request: Request):
+async def logout_post(request: Request):
     """Clear auth cookie and redirect to home."""
     response = RedirectResponse(request.url_for("home"), status_code=303)
-    # ВАЖНО: path должен совпадать с тем, что ставили в set_cookie()
     response.delete_cookie(settings.auth_cookie_name, path="/")
     return response

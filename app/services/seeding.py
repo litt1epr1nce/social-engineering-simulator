@@ -1,6 +1,8 @@
 """Seed 12 scenarios on first run. Realistic, neutral language. User-facing text in Russian."""
 import json
-from sqlalchemy.orm import Session
+
+from sqlalchemy import func, select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.scenario import Scenario
 
@@ -161,19 +163,26 @@ SCENARIOS = [
 ]
 
 
-def seed_scenarios(db: Session) -> int:
+async def seed_scenarios(db: AsyncSession) -> int:
     """Insert 12 scenarios if none exist. Returns number of scenarios now in DB."""
-    count = db.query(Scenario).count()
+    result = await db.execute(select(func.count(Scenario.id)))
+    count = int(result.scalar() or 0)
+
     if count > 0:
         return count
+
     for s in SCENARIOS:
-        scenario = Scenario(
-            title=s["title"],
-            channel=s["channel"],
-            message_text=s["message_text"],
-            tactic=s["tactic"],
-            choices_json=s["choices_json"],
+        db.add(
+            Scenario(
+                title=s["title"],
+                channel=s["channel"],
+                message_text=s["message_text"],
+                tactic=s["tactic"],
+                choices_json=s["choices_json"],
+            )
         )
-        db.add(scenario)
-    db.commit()
-    return db.query(Scenario).count()
+
+    await db.commit()
+
+    result2 = await db.execute(select(func.count(Scenario.id)))
+    return int(result2.scalar() or 0)

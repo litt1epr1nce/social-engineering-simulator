@@ -3,29 +3,26 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
+
 from app.core.config import get_settings
-from app.db.session import engine
 from app.db.base import Base
+from app.db.session import engine, AsyncSessionLocal
 from app.routers import web, api, auth
 from app.services.seeding import seed_scenarios
-from app.db.session import SessionLocal
-
-
-def create_tables():
-    Base.metadata.create_all(bind=engine)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    create_tables()
-    db = SessionLocal()
-    try:
-        seed_scenarios(db)
-    finally:
-        db.close()
+    # ✅ create tables (async)
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+
+    # ✅ seed scenarios (async)
+    async with AsyncSessionLocal() as db:
+        await seed_scenarios(db)
+
     yield
     # shutdown if needed
-    pass
 
 
 app = FastAPI(
@@ -45,5 +42,5 @@ app.include_router(api.router)
 
 
 @app.get("/health")
-def health():
+async def health():
     return {"status": "ok"}
